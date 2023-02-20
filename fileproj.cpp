@@ -31,7 +31,7 @@ public:
 		cout << "Customer ID :\n";
 		cout << "Customer Name :\n";
 		cout << "Customer Address :\n";
-		cout << "Costumer Phone number :\n";
+		cout << "Customer Phone number :\n";
 		cin >> cust_id;
 		cin >> cust_name;
 		cin >> cust_address;
@@ -61,7 +61,139 @@ public:
 	}
 };
 
+class product
+{
+	int a, b, product_phone;
+	int i;
+
+public:
+	int product_id;
+	string product_name;
+	string product_desc;
+	int product_stock;
+	float product_price;
+
+public:
+	product(){};
+	product(vector<string> content)
+	{
+		this->product_id = stoi(content[0]);
+		this->product_name = content[1];
+		this->product_desc = content[2];
+		this->product_stock = stoi(content[3]);
+		this->product_price = stof(content[4]);
+	};
+
+	void addProduct()
+
+	{
+		cout << "Product ID:\n";
+		cout << "Product Name :\n";
+		cout << "Product Description :\n";
+		cout << "Product Stock :\n";
+		cout << "Product Price :\n";
+		cin >> product_id;
+		cin >> product_name;
+		cin >> product_desc;
+		cin >> product_stock;
+		cin >> product_price;
+	}
+
+	void displayProduct()
+	{
+		cout << "\n\n";
+
+		cout << "Product ID :" << product_id << endl;
+		cout << "Product Name :" << product_name << endl;
+		cout << "Product Description :" << product_desc << endl;
+		cout << "Product Stock :" << product_stock << endl;
+		cout << "Product Price :" << product_price << endl;
+	}
+
+	void writeProduct()
+	{
+		fstream f1;
+		f1.open("product.csv", ios::app);
+		f1.seekp(0, ios::end);
+		f1 << this->product_id << ","
+		   << this->product_name << ","
+		   << this->product_desc << ","
+		   << this->product_stock << ","
+		   << this->product_price << endl;
+		f1.close();
+	}
+};
+
+class order
+{
+
+public:
+	int order_id;
+	int cust_id;
+	int product_id;
+	int quantity;
+	string order_status;
+	float order_total;
+
+public:
+	order(){};
+	order(vector<string> content)
+	{
+		this->order_id = stoi(content[0]);
+		this->cust_id = stoi(content[1]);
+		this->product_id = stoi(content[2]);
+		this->quantity = stoi(content[3]);
+		this->order_status = content[4];
+		this->order_total = stof(content[5]);
+	};
+
+	void addOrder()
+
+	{
+		cout << "Order ID:\n";
+		cout << "Customer ID:\n";
+		cout << "Product ID:\n";
+		cout << "Quantity :\n";
+		cout << "Order Status :\n";
+		cout << "Order Total :\n";
+		cin >> order_id;
+		cin >> cust_id;
+		cin >> product_id;
+		cin >> quantity;
+		cin >> order_status;
+		cin >> order_total;
+	}
+
+	void displayOrder()
+	{
+		cout << "\n\n";
+
+		cout << "Order ID :" << order_id << endl;
+		cout << "Customer ID :" << cust_id << endl;
+		cout << "Product ID :" << product_id << endl;
+		cout << "Quantity :" << quantity << endl;
+		cout << "Order Status :" << order_status << endl;
+		cout << "Order Total :" << order_total << endl;
+	}
+
+	void writeOrder()
+	{
+		fstream f1;
+		f1.open("order.csv", ios::app);
+		f1.seekp(0, ios::end);
+		f1 << this->order_id << ","
+		   << this->cust_id << ","
+		   << this->product_id << ","
+		   << this->quantity << ","
+		   << this->order_status << ","
+		   << this->order_total << endl;
+		f1.close();
+	}
+};
+
 unordered_map<int, customer> customers;
+unordered_map<int, product> products;
+unordered_map<int, order> orders;
 
 void readCustomers()
 {
@@ -144,6 +276,130 @@ void deleteCustomer()
 	f1.close();
 }
 
+void readProducts()
+{
+	product p;
+	ifstream f1;
+	f1.open("product.csv", ios::in);
+	vector<vector<string>> content;
+	vector<string> row;
+	string line, word;
+	while (getline(f1, line))
+	{
+		row.clear();
+		stringstream str(line);
+		while (getline(str, word, ','))
+			row.push_back(word);
+		content.push_back(row);
+	}
+
+	for (int i = 1; i < content.size(); i++)
+	{
+		product p(content[i]);
+		products[p.product_id] = p;
+	}
+	f1.close();
+}
+
+product searchProducts()
+{
+	readProducts();
+	int rn;
+	char found = 'n';
+	cout << "\n\n Enter Product ID you want to searchProducts :";
+	cin >> rn;
+	if (products.find(rn) == products.end())
+		cout << "\n\n\tRECORD NOT FOUND!!!!!!!!!!!!!\n"
+			 << endl;
+	else
+	{
+		return products[rn];
+	}
+}
+
+void updateProduct()
+{
+	product p = searchProducts();
+	p.addProduct();
+	products[p.product_id] = p;
+	remove("product.csv");
+	fstream f1;
+	cout << "\n";
+	f1.open("product.csv", ios::app);
+	f1 << "product_id"
+	   << ","
+	   << "product_name"
+	   << ","
+	   << "product_address"
+	   << ","
+	   << "product_phone" << endl;
+	for (auto i = products.begin(); i != products.end(); i++)
+		i->second.writeProduct();
+	f1.close();
+}
+
+void deleteProduct()
+{
+	product c = searchProducts();
+	remove("product.csv");
+	products.erase(c.product_id);
+	fstream f1;
+	f1.open("product.csv", ios::app);
+	f1 << "product_id"
+	   << ","
+	   << "product_name"
+	   << ","
+	   << "product_desc"
+	   << ","
+	   << "product_stock"
+	   << ","
+	   << "product_price" << endl;
+	for (auto i = products.begin(); i != products.end(); i++)
+		i->second.writeProduct();
+	f1.close();
+}
+
+void readOrders()
+{
+	order o;
+	ifstream f1;
+	f1.open("order.csv", ios::in);
+	vector<vector<string>> content;
+	vector<string> row;
+	string line, word;
+	while (getline(f1, line))
+	{
+		row.clear();
+		stringstream str(line);
+		while (getline(str, word, ','))
+			row.push_back(word);
+		content.push_back(row);
+	}
+
+	for (int i = 1; i < content.size(); i++)
+	{
+		order o(content[i]);
+		orders[o.order_id] = o;
+	}
+	f1.close();
+}
+
+order searchOrders()
+{
+	readOrders();
+	int rn;
+	char found = 'n';
+	cout << "\n\n Enter Order ID you want to searchOrders :";
+	cin >> rn;
+	if (orders.find(rn) == orders.end())
+		cout << "\n\n\tRECORD NOT FOUND!!!!!!!!!!!!!\n"
+			 << endl;
+	else
+	{
+		return orders[rn];
+	}
+}
+
 void customerMenu()
 {
 	cout << "Press" << endl;
@@ -211,17 +467,93 @@ void productMenu()
 	cout << "6 to return to main menu" << endl;
 	int choice;
 	cin >> choice;
+	switch (choice)
+	{
+	case 1:
+	{
+		product p;
+		p.addProduct();
+		p.writeProduct();
+		break;
+	}
+	case 2:
+	{
+		readProducts();
+		for (auto i = products.begin(); i != products.end(); i++)
+		{
+			i->second.displayProduct();
+		}
+		break;
+	}
+	case 3:
+	{
+		searchProducts().displayProduct();
+		break;
+	}
+	case 4:
+	{
+		updateProduct();
+		break;
+	}
+	case 5:
+	{
+		deleteProduct();
+		break;
+	}
+	case 6:
+	{
+		return;
+	}
+	default:
+	{
+		cout << "Enter valid choice";
+		break;
+	}
+	}
 }
 
 void orderMenu()
 {
 	cout << "Press" << endl;
 	cout << "1 to enter new order" << endl;
-	cout << "2 to show all order data" << endl;
-	cout << "3 to search an order" << endl;
+	cout << "2 to read all order data" << endl;
+	cout << "3 to search a order" << endl;
 	cout << "4 to return to main menu" << endl;
 	int choice;
 	cin >> choice;
+	switch (choice)
+	{
+	case 1:
+	{
+		order o;
+		o.addOrder();
+		o.writeOrder();
+		break;
+	}
+	case 2:
+	{
+		readOrders();
+		for (auto i = orders.begin(); i != orders.end(); i++)
+		{
+			i->second.displayOrder();
+		}
+		break;
+	}
+	case 3:
+	{
+		searchOrders().displayOrder();
+		break;
+	}
+	case 4:
+	{
+		return;
+	}
+	default:
+	{
+		cout << "Enter valid choice";
+		break;
+	}
+	}
 }
 
 int main()
@@ -231,6 +563,7 @@ int main()
 		cout<<"Press"<<endl;
 		cout<<"1 for Customer Menu:"<<endl;
 		cout<<"2 for Product Menu:"<<endl;
+		cout<<"3 for Order Menu:"<<endl;
 		cout<<"9 to EXIT:"<<endl;
 		cin>>choose;
 		switch(choose){
