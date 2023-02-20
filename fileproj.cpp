@@ -124,8 +124,76 @@ public:
 	}
 };
 
+class order
+{
+
+public:
+	int order_id;
+	int cust_id;
+	int product_id;
+	int quantity;
+	string order_status;
+	float order_total;
+
+public:
+	order(){};
+	order(vector<string> content)
+	{
+		this->order_id = stoi(content[0]);
+		this->cust_id = stoi(content[1]);
+		this->product_id = stoi(content[2]);
+		this->quantity = stoi(content[3]);
+		this->order_status = content[4];
+		this->order_total = stof(content[5]);
+	};
+
+	void addOrder()
+
+	{
+		cout << "Order ID:\n";
+		cout << "Customer ID:\n";
+		cout << "Product ID:\n";
+		cout << "Quantity :\n";
+		cout << "Order Status :\n";
+		cout << "Order Total :\n";
+		cin >> order_id;
+		cin >> cust_id;
+		cin >> product_id;
+		cin >> quantity;
+		cin >> order_status;
+		cin >> order_total;
+	}
+
+	void displayOrder()
+	{
+		cout << "\n\n";
+
+		cout << "Order ID :" << order_id << endl;
+		cout << "Customer ID :" << cust_id << endl;
+		cout << "Product ID :" << product_id << endl;
+		cout << "Quantity :" << quantity << endl;
+		cout << "Order Status :" << order_status << endl;
+		cout << "Order Total :" << order_total << endl;
+	}
+
+	void writeOrder()
+	{
+		fstream f1;
+		f1.open("order.csv", ios::app);
+		f1.seekp(0, ios::end);
+		f1 << this->order_id << ","
+		   << this->cust_id << ","
+		   << this->product_id << ","
+		   << this->quantity << ","
+		   << this->order_status << ","
+		   << this->order_total << endl;
+		f1.close();
+	}
+};
+
 unordered_map<int, customer> customers;
 unordered_map<int, product> products;
+unordered_map<int, order> orders;
 
 void readCustomers()
 {
@@ -291,6 +359,47 @@ void deleteProduct()
 	f1.close();
 }
 
+void readOrders()
+{
+	order o;
+	ifstream f1;
+	f1.open("order.csv", ios::in);
+	vector<vector<string>> content;
+	vector<string> row;
+	string line, word;
+	while (getline(f1, line))
+	{
+		row.clear();
+		stringstream str(line);
+		while (getline(str, word, ','))
+			row.push_back(word);
+		content.push_back(row);
+	}
+
+	for (int i = 1; i < content.size(); i++)
+	{
+		order o(content[i]);
+		orders[o.order_id] = o;
+	}
+	f1.close();
+}
+
+order searchOrders()
+{
+	readOrders();
+	int rn;
+	char found = 'n';
+	cout << "\n\n Enter Order ID you want to searchOrders :";
+	cin >> rn;
+	if (orders.find(rn) == orders.end())
+		cout << "\n\n\tRECORD NOT FOUND!!!!!!!!!!!!!\n"
+			 << endl;
+	else
+	{
+		return orders[rn];
+	}
+}
+
 void customerMenu()
 {
 	cout << "Press" << endl;
@@ -407,11 +516,44 @@ void orderMenu()
 {
 	cout << "Press" << endl;
 	cout << "1 to enter new order" << endl;
-	cout << "2 to show all order data" << endl;
-	cout << "3 to search an order" << endl;
+	cout << "2 to read all order data" << endl;
+	cout << "3 to search a order" << endl;
 	cout << "4 to return to main menu" << endl;
 	int choice;
 	cin >> choice;
+	switch (choice)
+	{
+	case 1:
+	{
+		order o;
+		o.addOrder();
+		o.writeOrder();
+		break;
+	}
+	case 2:
+	{
+		readOrders();
+		for (auto i = orders.begin(); i != orders.end(); i++)
+		{
+			i->second.displayOrder();
+		}
+		break;
+	}
+	case 3:
+	{
+		searchOrders().displayOrder();
+		break;
+	}
+	case 4:
+	{
+		return;
+	}
+	default:
+	{
+		cout << "Enter valid choice";
+		break;
+	}
+	}
 }
 
 int main()
@@ -421,6 +563,7 @@ int main()
 		cout<<"Press"<<endl;
 		cout<<"1 for Customer Menu:"<<endl;
 		cout<<"2 for Product Menu:"<<endl;
+		cout<<"3 for Order Menu:"<<endl;
 		cout<<"9 to EXIT:"<<endl;
 		cin>>choose;
 		switch(choose){
